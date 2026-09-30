@@ -5,6 +5,9 @@ export interface UserData {
   lastName: string;
   email: string;
   phone: string;
+  dob?: string;
+  nationality?: string;
+  password?: string;
 }
 
 export interface Transaction {
@@ -32,6 +35,7 @@ const defaultUser: UserData = {
   lastName: '',
   email: '',
   phone: '',
+  password: '',
 };
 
 const initialTransactions: Transaction[] = [

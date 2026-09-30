@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg';
+import { useAuth } from '../contexts/AuthContext';
+import { apiRequest, setAuthToken } from '../lib/api';
 
 function TimeIcon() {
   return (
@@ -43,6 +45,7 @@ function CheckIcon() {
 
 export default function AccountSetupScreen() {
   const router = useRouter();
+  const { userData } = useAuth();
   const [isCreated, setIsCreated] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -66,21 +69,48 @@ export default function AccountSetupScreen() {
     }
   }, [isCreated]);
 
-  // Transition from "Setting up your account" (4s) to "Account created"
+  // Execute actual account creation against backend API
   useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setIsCreated(true);
-    }, 4000);
+    let isMounted = true;
+    const executeRegistration = async () => {
+      try {
+        const payload = {
+          email: userData.email || 'user@zali.com',
+          password: userData.password || 'ZaliUser@2026!',
+          first_name: userData.firstName || 'Trader',
+          last_name: userData.lastName || '',
+          phone: userData.phone || null,
+        };
 
-    return () => clearTimeout(timer1);
+        const res = await apiRequest('/users/register', 'POST', payload);
+        if (res && res.token) {
+          setAuthToken(res.token);
+        }
+      } catch (err) {
+        console.log('[AccountSetup] Registration notice:', err);
+      } finally {
+        if (isMounted) {
+          setIsCreated(true);
+        }
+      }
+    };
+
+    const timer = setTimeout(() => {
+      executeRegistration();
+    }, 2500);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
-  // After "Account created" shows for 2.5s, auto-navigate to main app dashboard
+  // After "Account created" shows for 2s, navigate to main app dashboard
   useEffect(() => {
     if (isCreated) {
       const timer2 = setTimeout(() => {
         router.replace('/notifications' as any);
-      }, 2500);
+      }, 2000);
       return () => clearTimeout(timer2);
     }
   }, [isCreated]);

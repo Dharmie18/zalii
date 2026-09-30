@@ -106,7 +106,7 @@ export default function GetStartedScreen() {
                     <TextInput
                       ref={inputRef}
                       style={styles.textInput}
-                      placeholder="jonathandoe@gmail.com"
+                      placeholder="youremail@gmail.com"
                       placeholderTextColor="#9CA3AF"
                       keyboardType="email-address"
                       autoCapitalize="none"

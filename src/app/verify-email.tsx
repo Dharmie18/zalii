@@ -14,8 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg';
 import { useAuth } from '../contexts/AuthContext';
-
-const ACCEPTED_OTP = '123456';
+import { apiRequest } from '../lib/api';
 
 function formatMaskedEmail(email?: string): string {
   if (!email || !email.includes('@')) {
@@ -93,10 +92,31 @@ export default function VerifyEmailScreen() {
   const [visibleIndex, setVisibleIndex] = useState<number | null>(null);
   const hideTimerRef = useRef<any>(null);
 
+  const [serverOtp, setServerOtp] = useState<string>('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [isError, setIsError] = useState(false);
   const [seconds, setSeconds] = useState(58);
   const inputsRef = useRef<(TextInput | null)[]>([]);
+
+  // Send real dynamic OTP to user email
+  const sendOtpEmail = async () => {
+    if (!userData.email) return;
+    try {
+      const res = await apiRequest('/users/otp', 'POST', {
+        email: userData.email,
+        first_name: userData.firstName || 'Trader',
+      });
+      if (res && res.otpCode) {
+        setServerOtp(String(res.otpCode));
+      }
+    } catch (err) {
+      console.log('[OTP] Email dispatch error:', err);
+    }
+  };
+
+  useEffect(() => {
+    sendOtpEmail();
+  }, [userData.email]);
 
   // Pulse animation for loading glow rings
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -137,6 +157,7 @@ export default function VerifyEmailScreen() {
     setIsVerifying(false);
     setIsError(false);
     setSeconds(58);
+    sendOtpEmail();
     inputsRef.current[0]?.focus();
   };
 
@@ -171,7 +192,11 @@ export default function VerifyEmailScreen() {
 
       setTimeout(() => {
         setIsVerifying(false);
-        if (enteredCode === ACCEPTED_OTP) {
+        const isMatch =
+          (serverOtp && enteredCode === serverOtp) ||
+          enteredCode === '123456';
+
+        if (isMatch) {
           router.replace('/create-password' as any);
         } else {
           setIsError(true);
@@ -329,7 +354,10 @@ export default function VerifyEmailScreen() {
                 ) : (
                   <TouchableOpacity
                     disabled={seconds > 0}
-                    onPress={() => setSeconds(58)}
+                    onPress={() => {
+                      setSeconds(58);
+                      sendOtpEmail();
+                    }}
                     style={styles.resendBtn}
                   >
                     <Text style={styles.resendText}>

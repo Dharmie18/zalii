@@ -13,6 +13,8 @@ import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg';
 import { AppShell } from '../../components/AppShell';
 import { FeatureCard } from '../../components/FeatureCard';
 import { QuickActionCard } from '../../components/QuickActionCard';
+import { BuyGiftcardModal } from '../../components/BuyGiftcardModal';
+import { SellGiftcardModal } from '../../components/SellGiftcardModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { colors } from '../../theme/tokens';
 
@@ -96,6 +98,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { userData, balance } = useAuth();
   const [showGiftcardModal, setShowGiftcardModal] = useState(false);
+  const [showBuyGiftcardModal, setShowBuyGiftcardModal] = useState(false);
+  const [showSellGiftcardModal, setShowSellGiftcardModal] = useState(false);
 
   const firstName = userData.firstName || 'Ayodeji';
   const initial = firstName.charAt(0).toUpperCase();
@@ -167,7 +171,7 @@ export default function HomeScreen() {
               icon={<SellGiftcardIcon />}
               backgroundColor="#E7FAE3"
               label="Sell giftcard"
-              onPress={() => setShowGiftcardModal(true)}
+              onPress={() => setShowSellGiftcardModal(true)}
             />
             <QuickActionCard
               icon={<HottestCardsIcon />}
@@ -258,7 +262,7 @@ export default function HomeScreen() {
                 activeOpacity={0.9}
                 onPress={() => {
                   setShowGiftcardModal(false);
-                  Alert.alert('Buy Giftcard', 'Navigating to Buy Giftcard marketplace...');
+                  setShowBuyGiftcardModal(true);
                 }}
               >
                 <View style={styles.optionTextCol}>
@@ -276,7 +280,7 @@ export default function HomeScreen() {
                 activeOpacity={0.9}
                 onPress={() => {
                   setShowGiftcardModal(false);
-                  router.push('/sell-crypto');
+                  setShowSellGiftcardModal(true);
                 }}
               >
                 <View style={styles.optionTextCol}>
@@ -291,6 +295,18 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Buy Giftcard Modal */}
+      <BuyGiftcardModal
+        visible={showBuyGiftcardModal}
+        onClose={() => setShowBuyGiftcardModal(false)}
+      />
+
+      {/* Sell Giftcard Modal */}
+      <SellGiftcardModal
+        visible={showSellGiftcardModal}
+        onClose={() => setShowSellGiftcardModal(false)}
+      />
     </AppShell>
   );
 }

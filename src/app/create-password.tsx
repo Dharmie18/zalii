@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg';
+import { useAuth } from '../contexts/AuthContext';
 
 function KeyholeIcon() {
   return (
@@ -54,6 +55,7 @@ function EyeIcon() {
 
 export default function CreatePasswordScreen() {
   const router = useRouter();
+  const { updateUserData } = useAuth();
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<TextInput>(null);
@@ -106,6 +108,7 @@ export default function CreatePasswordScreen() {
 
   const handleCreatePassword = () => {
     if (!isValid) return;
+    updateUserData({ password });
     router.replace('/phone-number' as any);
   };
 

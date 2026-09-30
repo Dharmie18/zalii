@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 export default function StartupScreen() {
   const router = useRouter();
 
-  // Auto-navigate to welcome page after brief presentation (or tap anywhere)
+  // Auto-navigate to welcome page
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push('/welcome');
